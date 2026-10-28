@@ -37,20 +37,21 @@ function createChessGraph() {
 
 const chessGraph = createChessGraph();
 
-function knightMoves(start, end) {
+export function knightMoves(start, end) {
   const queue = [start];
   const visited = [];
+
   while (queue.length) {
     start = queue.shift();
     const possibleMoves = chessGraph[start[0]][start[1]].filter(
-      (val) => !JSON.stringify(visited).includes(JSON.stringify(val)),
+      (move) => !JSON.stringify(visited).includes(JSON.stringify(move)),
     );
-    possibleMoves.forEach((val) => (val.parent = start));
+    possibleMoves.forEach((move) => (move.parent = start));
 
     queue.push(...possibleMoves);
     visited.push(...possibleMoves);
 
-    if (JSON.stringify([start[0], start[1]]) === JSON.stringify(end)) {
+    if (JSON.stringify(start) === JSON.stringify(end)) {
       const result = [];
       while (start) {
         result.push([start[0], start[1]]);
@@ -58,13 +59,10 @@ function knightMoves(start, end) {
       }
 
       console.log(
-        `Wow you made it in ${result.length - 1} moves check the result:`,
+        `The shortest path takes ${result.length - 1} moves, check it!`,
       );
-      console.log(result.reverse());
-      return;
+      result.reverse().forEach((move) => console.log(move));
+      break;
     }
   }
 }
-
-console.log(knightMoves([0, 0], [3, 3]));
-// // console.log(knightMoves([2,3], [4,3]));
