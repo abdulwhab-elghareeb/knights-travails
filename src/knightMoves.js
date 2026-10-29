@@ -1,5 +1,5 @@
 function getAllPossibleMoves(start) {
-  const possibleMoves = [
+  return [
     [start[0] - 2, start[1] - 1],
     [start[0] - 2, start[1] + 1],
     [start[0] + 2, start[1] - 1],
@@ -8,19 +8,9 @@ function getAllPossibleMoves(start) {
     [start[0] - 1, start[1] - 2],
     [start[0] + 1, start[1] + 2],
     [start[0] + 1, start[1] - 2],
-  ];
-
-  for (let i = 0; i < possibleMoves.length; i++) {
-    if (
-      possibleMoves[i][0] < 0 ||
-      possibleMoves[i][0] > 7 ||
-      possibleMoves[i][1] < 0 ||
-      possibleMoves[i][1] > 7
-    )
-      possibleMoves.splice(i--, 1);
-  }
-
-  return possibleMoves;
+  ].filter(
+    (move) => !(move[0] < 0 || move[0] > 7 || move[1] < 0 || move[1] > 7),
+  );
 }
 
 function createChessGraph() {
@@ -35,34 +25,36 @@ function createChessGraph() {
   return chess;
 }
 
-const chessGraph = createChessGraph();
-
 export function knightMoves(start, end) {
-  const queue = [start];
-  const visited = [];
+  const chessGraph = createChessGraph();
+  const queue = [{ cord: start, parent: null }];
+  const visited = {};
 
   while (queue.length) {
     start = queue.shift();
-    const possibleMoves = chessGraph[start[0]][start[1]].filter(
-      (move) => !JSON.stringify(visited).includes(JSON.stringify(move)),
+    const possibleMoves = chessGraph[start.cord[0]][start.cord[1]].filter(
+      (move) => !visited[JSON.stringify(move)],
     );
-    possibleMoves.forEach((move) => (move.parent = start));
+
+    possibleMoves.forEach((move, i, arr) => {
+      arr[i] = { cord: move, parent: start };
+      visited[JSON.stringify(arr[i].cord)] = true;
+    });
 
     queue.push(...possibleMoves);
-    visited.push(...possibleMoves);
 
-    if (JSON.stringify(start) === JSON.stringify(end)) {
+    if (JSON.stringify(start.cord) === JSON.stringify(end)) {
       const result = [];
       while (start) {
-        result.push([start[0], start[1]]);
+        result.unshift(start.cord);
         start = start.parent;
       }
 
       console.log(
         `The shortest path takes ${result.length - 1} moves, check it!`,
       );
-      result.reverse().forEach((move) => console.log(move));
-      break;
+      result.forEach((move) => console.log(move));
+      return;
     }
   }
 }
